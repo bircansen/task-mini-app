@@ -248,4 +248,39 @@ public class TaskService
             task.CreatedAt
         ));
     }
+
+    //BONUS: KULLANICI BAZLI AÇIK GÖREV SAYISI
+    public async Task<List<UserOpenTaskCountDto>> GetOpenTaskCountByUser()
+    {
+        // 1) DB'den sadece open task sayıları
+        var openCounts = await _db.Tasks
+            .AsNoTracking()
+            .Where(t =>
+                t.AssigneeUserId != null &&
+                (t.Status == "todo" || t.Status == "doing") 
+            )
+            .GroupBy(t => t.AssigneeUserId!.Value)
+            .Select(g => new { UserId = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var countMap = openCounts.ToDictionary(x => x.UserId, x => x.Count);
+
+        // 2) Users'ı çek
+        var users = await _db.Users
+            .AsNoTracking()
+            .Select(u => new { u.Id, u.FullName })
+            .ToListAsync();
+
+        // 3) Join
+        var result = users
+            .Select(u => new UserOpenTaskCountDto(
+                u.Id,
+                u.FullName,
+                countMap.TryGetValue(u.Id, out var c) ? c : 0
+            ))
+            .OrderByDescending(x => x.OpenTaskCount)
+            .ToList();
+
+        return result;
+    }
 }

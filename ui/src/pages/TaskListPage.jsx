@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { createTask, getTasks, patchTaskStatus, updateTask } from "../api/tasks";
 import { getUsers } from "../api/users";
 import TaskModal from "../components/TaskModal";
+import ReportsPanel from "../components/ReportsPanel";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All" },
@@ -233,7 +234,7 @@ export default function TaskListPage() {
           </tbody>
         </table>
       )}
-
+      <ReportsPanel />
       <TaskModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
