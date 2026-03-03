@@ -4,6 +4,17 @@ using TaskApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ui", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -25,8 +36,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// UseCors eklendi.
+app.UseCors("ui");
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
